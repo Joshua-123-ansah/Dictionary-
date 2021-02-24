@@ -7,7 +7,8 @@ from tkinter import *
 window=Tk()
 window.title("Dictionary")
 #Loading data from json file to a variable data
-data=json.load(open("data.json","r"))
+with open("jsonfile.json") as jsonfile:
+    data=json.load(jsonfile)
 
 #Building an entry widget where a user can type a word 
 e=Entry(window,bg="#ABB8B8",width=50,borderwidth=5,font=("Times New Roman",13))
@@ -36,13 +37,17 @@ def word_meaning():
 #Because the json file is in a dictionary form, if a word has two or more meaning, the meaning of the word is displayed in a list form.
 # So this fuction changes the meaning of the word from a list to a sentence form
 def list_to_sentence():
+    t1.delete(1.0,END)
     output=data[word]
     if type(output)==list:
         for line in output:
             #Display meaning of word in the text widget/window
             t1.insert(END,line+"\n")
+            
     else:
+        t1.delete(1.0,END)
         t1.insert(END,output)
+        
 
   #The meaning of a word is searched when a user click on the Yes Button
 def yes_button():
@@ -51,22 +56,40 @@ def yes_button():
 
 def no_button():  #Display Word not found if a user click on the No button
     t1.delete(1.0,END)
-    t1.insert(END, "Word not found")
+    global users_word
+    users_word=str(e.get()).lower()
+    e.delete(0,END)
+    t1.insert(END, "Word not found"+"\n"+"To add word to the dictionary"+"\n"+"Type meaning of the word in the entry widget upward"+
+    "\n"+" and click on the add button")
+    
+#Adding a word and its meaning to the json 
+def add_word():
+    global meaning_of_entered_word
+    
+    meaning_of_entered_word=str(e.get())  #This takes the meaning of a word from a user and store it in the variable
+    
+    data[users_word]=meaning_of_entered_word #This adds a word and it meaning to the json file 
 
+    with open("jsonfile.json","w") as w:
+        json.dump(data,w)
 
+    t1.delete(1.0,END)
+    t1.insert(END,"Word and it meaning added to dictionary")
 
-
+    
 
 enter_button=Button(window,text="Enter",bg="#A9CCCC",padx=25,pady=6,command=word_meaning) #Design's the Enter button
 yes_button=Button(window,text="Yes",bg="#A9CCCC",padx=25,pady=6,command=yes_button) #Design's the Yes button
 no_button=Button(window,text="No",bg="#A9CCCC",padx=25,pady=6,command=no_button)  #Design's the No button
+add_button=Button(window,text="Add",bg="#A9CCCC",padx=25,pady=6,command=add_word)  #Design's the Add button
 
 #Arrange all the widgets on the GUI
-e.grid(row=0,column=0,columnspan=3,padx=15)
+e.grid(row=0,column=0,columnspan=4,padx=15)
 enter_button.grid(row=2,column=0)
 yes_button.grid(row=2,column=1)
 no_button.grid(row=2,column=2)
-t1.grid(row=1,column=0,columnspan=3)
+add_button.grid(row=2,column=3)
+t1.grid(row=1,column=0,columnspan=4)
 
 window.mainloop()
 
